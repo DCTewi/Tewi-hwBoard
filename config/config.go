@@ -185,9 +185,11 @@ func TryLoadConfig() {
 	app.UserTimeZone = appMap["userTimeZone"].(string)
 
 	adminemailSlice := appMap["adminEmails"].([]interface{})
+	var adminemails []string
 	for _, i := range adminemailSlice {
-		app.AdminEmails = append(App.AdminEmails, i.(string))
+		adminemails = append(adminemails, i.(string))
 	}
+	app.AdminEmails = adminemails
 	App = app
 
 	pathMap := pool["Path"].(map[string]interface{})
