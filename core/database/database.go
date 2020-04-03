@@ -3,14 +3,23 @@ package database
 import (
 	"container/list"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/dctewi/tewi-hwboard/config"
+
+	log "unknwon.dev/clog/v2"
 
 	_ "github.com/mattn/go-sqlite3" // noerror
 )
 
 func checkerr(err error) {
+	defer func() {
+		if x := recover(); x != nil {
+			log.Error("Database PANIC: " + fmt.Sprint(x))
+		}
+	}()
+
 	if err != nil {
 		panic(err)
 	}

@@ -76,8 +76,15 @@ func main() {
 	mux.RegisterStaticPath("/js", "./static/js")
 	mux.RegisterStaticPath("/favicon.ico", "./static/img/favicon.ico")
 
-	log.Info("Application started, listening: " + config.App.ListenPort)
-	err := http.ListenAndServe(config.App.ListenPort, mux)
+	log.Info("Application started, listening...")
+
+	var err error = nil
+	if config.App.UseTLS {
+		go http.ListenAndServe(config.App.HTTPPort, http.HandlerFunc(route.RedirectSSL))
+		err = http.ListenAndServeTLS(config.App.SSLPort, config.App.TLSCrtPath, config.App.TLSKeyPath, mux)
+	} else {
+		err = http.ListenAndServe(config.App.HTTPPort, mux)
+	}
 
 	if err != nil {
 		log.Fatal("Application fatal error: " + err.Error())

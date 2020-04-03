@@ -3,13 +3,21 @@ package config
 // App configs
 var App = struct {
 	Domain       string
-	ListenPort   string
+	HTTPPort     string
+	SSLPort      string
+	UseTLS       bool
+	TLSCrtPath   string
+	TLSKeyPath   string
 	Title        string
 	UserTimeZone string
 	AdminEmails  []string
 }{
 	Domain:       "localhost",
-	ListenPort:   ":80",
+	HTTPPort:     ":80",
+	SSLPort:      ":443",
+	UseTLS:       true,
+	TLSCrtPath:   "./domain.crt",
+	TLSKeyPath:   "./domain.key",
 	Title:        "作业布告栏",
 	UserTimeZone: "Asia/Shanghai",
 	AdminEmails: []string{
@@ -27,7 +35,7 @@ var Mail = struct {
 	MailAccount: "you@domain.com",
 	Password:    "password",
 	SMTPServer:  "smtp.somedomain.com",
-	SMTPPort:    "25",
+	SMTPPort:    "465",
 }
 
 // Database configs

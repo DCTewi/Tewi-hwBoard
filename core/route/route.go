@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dctewi/tewi-hwboard/config"
 	"github.com/dctewi/tewi-hwboard/frame/controllers"
 
 	log "unknwon.dev/clog/v2"
@@ -76,4 +77,20 @@ func (p *Mux) RegisterStaticPath(urlpath, filepath string) {
 	if _, ok := p.staticMap[urlpath]; !ok {
 		panic("register error: " + urlpath)
 	}
+}
+
+// RedirectSSL redirect to ssl
+func RedirectSSL(w http.ResponseWriter, r *http.Request) {
+	host := strings.Split(r.Host, ":")
+	if len(host) > 1 {
+		host[1] = config.App.SSLPort[1:]
+	}
+
+	log.Info("Get HTTP request with host:" + r.URL.Host + " path:" + r.URL.Path)
+	target := "https://" + strings.Join(host, ":") + r.URL.Path
+	if len(r.URL.RawQuery) > 0 {
+		target += "?" + r.URL.RawQuery
+	}
+	log.Info("Redirect to " + target)
+	http.Redirect(w, r, target, http.StatusMovedPermanently)
 }
