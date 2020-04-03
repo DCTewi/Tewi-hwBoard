@@ -44,83 +44,35 @@ sqlite3 -version
 go get github.com/dctewi/tewi-hwboard
 ```
 
-3. 配置设置
+3. 文件准备
 
-修改`${GOPATH}/src/github.com/dctewi/tewi-hwboard/config/config.go`中的`App`，`Mail`，`Database`配置，其余配置按需修改：
-
-```go
-// App configs
-var App = struct {
-	Domain       string
-	HTTPPort     string
-	SSLPort      string
-	UseTLS       bool
-	TLSCrtPath   string
-	TLSKeyPath   string
-	Title        string
-	UserTimeZone string
-	AdminEmails  []string
-}{
-	Domain:       "localhost",
-	HTTPPort:     ":80",
-	SSLPort:      ":443",
-	UseTLS:       true,
-	TLSCrtPath:   "./domain.crt",
-	TLSKeyPath:   "./domain.key",
-	Title:        "作业布告栏",
-	UserTimeZone: "Asia/Shanghai",
-	AdminEmails: []string{
-		"you@domain.com",
-	},
-}
-
-// Mail configs
-var Mail = struct {
-	MailAccount string
-	Password    string
-	SMTPServer  string
-	SMTPPort    string
-}{
-	MailAccount: "you@domain.com",
-	Password:    "password",
-	SMTPServer:  "smtp.somedomain.com",
-	SMTPPort:    "465",
-}
-
-// Database configs
-var Database = struct {
-	Path string
-}{
-	Path: "./database.db",
-}
-```
-
-4. 文件准备
-
-进入想要安装的位置，如`~/hwboard`。将源码下的`./config/database.sql`，`./static/*`，`./views/*`复制进来，并在此处创建 SQLite3 数据库：
+进入想要安装的位置，如`~/hwboard`。将源码目录下的`app`文件夹复制进来，并在此处创建 SQLite3 数据库：
 
 ```shell
-mkdir ~/hwboard ~/hwboard/static ~/hwboard/views
+mkdir ~/hwboard ~/hwboard/app
 
 cd ${GOPATH}/src/github.com/dctewi/tewi-hwboard/
-cp ./config/database.sql ~/hwboard/database.sql
-cp ./static/* ~/hwboard/static/
-cp ./views/* ~/hwboard/views/
+cp ./app/* ~/hwboard/app/
 
 cd ~/hwboard
 sqlite3 database.db
-sqlite> .read database.sql
+sqlite> .read app/database.sql
 sqlite> .quit
 ```
 
-5. 编译
+5. 编译并初次运行以生成配置文件
 
 ```shell
 cd ~/hwboard
 go build github.com/dctewi/tewi-hwboard
+./tewi-hwboard
 ```
 
-6. 创建守护进程
+6. 应用设置
+
+修改生成的配置文件`~/hwboard/config.json`的相关项目，该文件将在每次启动时读取。
+
+7. 创建守护进程
 
 编辑`/lib/systemd/system/hwboard.service`：
 

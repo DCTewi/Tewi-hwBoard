@@ -33,3 +33,7 @@ func TestZipDir(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestGetNameListMap(t *testing.T) {
+	fmt.Println(util.GetNameListMap())
+}

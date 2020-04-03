@@ -110,28 +110,30 @@ func (c *LoginController) Post(w http.ResponseWriter, r *http.Request) {
 				// Check form
 				if okqq, okid := util.CheckUserQ(userq), util.CheckStuID(stuid); okqq && okid {
 					// Check database
-					switch info := database.GetUserInfoBySID(stuid); info.Email {
-					default:
-						// Wrong login
+					infoByStuID := database.GetUserInfoBySID(stuid)
+					infoByEmail := database.GetUserInfoByEmail(userq)
+
+					if infoByEmail == infoByStuID {
+						if infoByStuID.Email == "" { // New login
+							info := database.UserInfo{}
+							info.Email = userq
+							info.StudentID = stuid
+							database.Insert(info)
+							log.Info("Login with register success: userq:" + userq + " stuid:" + stuid)
+						}
+						// Correct login
+						sess.Set("userinfo", infoByStuID)
+						http.Redirect(w, r, "/", 303)
+						log.Info("Login success: userq:" + userq + " stuid:" + stuid)
+
+					} else { // Wrong login
 						q := r.URL.Query()
 						q.Set("error", "multireg")
 						r.URL.RawQuery = q.Encode()
 						http.Redirect(w, r, "/login?error=multireg", 303)
 						log.Warn("Login failed with userq:" + userq + " stuid:" + stuid + "(Multi Reg)")
-						break
-					case "":
-						// Empty
-						info.Email = userq
-						info.StudentID = stuid
-						database.Insert(info)
-						log.Info("Login with register success: userq:" + userq + " stuid:" + stuid)
-						fallthrough
-					case userq:
-						// Right
-						sess.Set("userinfo", info)
-						http.Redirect(w, r, "/", 303)
-						log.Info("Login success: userq:" + userq + " stuid:" + stuid)
 					}
+
 				}
 			}
 		}

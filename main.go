@@ -71,10 +71,10 @@ func main() {
 	mux.RegiterController("/history", &controllers.HistoryController{})
 	mux.RegiterController("/submit", &controllers.SubmitController{})
 
-	mux.RegisterStaticPath("/img", "./static/img")
-	mux.RegisterStaticPath("/css", "./static/css")
-	mux.RegisterStaticPath("/js", "./static/js")
-	mux.RegisterStaticPath("/favicon.ico", "./static/img/favicon.ico")
+	mux.RegisterStaticPath("/img", config.Path.StaticFoler+"/img")
+	mux.RegisterStaticPath("/css", config.Path.StaticFoler+"/css")
+	mux.RegisterStaticPath("/js", config.Path.StaticFoler+"/js")
+	mux.RegisterStaticPath("/favicon.ico", config.Path.StaticFoler+"/img/favicon.ico")
 
 	log.Info("Application started, listening...")
 

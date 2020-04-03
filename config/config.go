@@ -1,17 +1,26 @@
 package config
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+)
+
+// TypeApp struct
+type TypeApp struct {
+	Domain       string   `json:"domain"`
+	HTTPPort     string   `json:"httpPort"`
+	SSLPort      string   `json:"sslPort"`
+	UseTLS       bool     `json:"useTLS"`
+	TLSCrtPath   string   `json:"crtFilepath"`
+	TLSKeyPath   string   `json:"keyFilepath"`
+	Title        string   `json:"appTitle"`
+	UserTimeZone string   `json:"userTimeZone"`
+	AdminEmails  []string `json:"adminEmails"`
+}
+
 // App configs
-var App = struct {
-	Domain       string
-	HTTPPort     string
-	SSLPort      string
-	UseTLS       bool
-	TLSCrtPath   string
-	TLSKeyPath   string
-	Title        string
-	UserTimeZone string
-	AdminEmails  []string
-}{
+var App = TypeApp{
 	Domain:       "localhost",
 	HTTPPort:     ":80",
 	SSLPort:      ":443",
@@ -25,39 +34,67 @@ var App = struct {
 	},
 }
 
+// TypePath struct
+type TypePath struct {
+	StaticFoler    string `json:"staticFolder"`
+	UploadFolder   string `json:"uploadFolder"`
+	ViewsFolder    string `json:"viewsFolder"`
+	NameListFolder string `json:"namelistFolder"`
+}
+
+// Path configs
+var Path = TypePath{
+	StaticFoler:    "./app/static",
+	UploadFolder:   "./upload",
+	ViewsFolder:    "./app/views",
+	NameListFolder: "/app/names",
+}
+
+// TypeMail struct
+type TypeMail struct {
+	MailAccount string `json:"mailAccount"`
+	Password    string `json:"mailPassword"`
+	SMTPServer  string `json:"smtpServer"`
+	SMTPPort    string `json:"smtpPort"`
+}
+
 // Mail configs
-var Mail = struct {
-	MailAccount string
-	Password    string
-	SMTPServer  string
-	SMTPPort    string
-}{
+var Mail = TypeMail{
 	MailAccount: "you@domain.com",
 	Password:    "password",
 	SMTPServer:  "smtp.somedomain.com",
 	SMTPPort:    "465",
 }
 
+// TypeDatabase struct
+type TypeDatabase struct {
+	Path string `json:"dbPath"`
+}
+
 // Database configs
-var Database = struct {
-	Path string
-}{
+var Database = TypeDatabase{
 	Path: "./database.db",
 }
 
+// TypeRegex struct
+type TypeRegex struct {
+	PatternQQ    string `json:"patternQQ"`
+	PatternStuID string `json:"patternStudentID"`
+}
+
 // Regex configs
-var Regex = struct {
-	PatternQQ    string
-	PatternStuID string
-}{
+var Regex = TypeRegex{
 	PatternQQ:    "^[0-9]{5,15}$",
-	PatternStuID: "^20182410[0-9]{4}$",
+	PatternStuID: "^2018[0-9]{8}$",
+}
+
+// TypeLog struct
+type TypeLog struct {
+	Filepath string `json:"logPath"`
 }
 
 // Log configs
-var Log = struct {
-	Filepath string
-}{
+var Log = TypeLog{
 	Filepath: "./logs",
 }
 
@@ -105,4 +142,113 @@ var WebConstance = map[string]string{
 	"QueryFileSuccess":      "请求成功, 正在下载...",
 	"QueryFileUnknownError": "请求失败",
 	"NoAvailableFile":       "没有可用文件",
+}
+
+func init() {
+	TryLoadConfig()
+}
+
+// TryLoadConfig while init
+func TryLoadConfig() {
+	filename := "./config.json"
+
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		ExportDefault()
+		return
+	}
+
+	pool := make(map[string]interface{})
+
+	err = json.Unmarshal(bytes, &pool)
+	if err != nil {
+		ExportDefault()
+		return
+	}
+
+	defer func() {
+		if x := recover(); x != nil {
+			ExportDefault()
+			panic("json error: " + fmt.Sprint(x))
+		}
+	}()
+
+	appMap := pool["App"].(map[string]interface{})
+	app := TypeApp{}
+	app.Domain = appMap["domain"].(string)
+	app.HTTPPort = appMap["httpPort"].(string)
+	app.SSLPort = appMap["sslPort"].(string)
+	app.UseTLS = appMap["useTLS"].(bool)
+	app.TLSCrtPath = appMap["crtFilepath"].(string)
+	app.TLSKeyPath = appMap["keyFilepath"].(string)
+	app.Title = appMap["appTitle"].(string)
+	app.UserTimeZone = appMap["userTimeZone"].(string)
+
+	adminemailSlice := appMap["adminEmails"].([]interface{})
+	for _, i := range adminemailSlice {
+		app.AdminEmails = append(App.AdminEmails, i.(string))
+	}
+	App = app
+
+	pathMap := pool["Path"].(map[string]interface{})
+	path := TypePath{}
+	path.StaticFoler = pathMap["staticFolder"].(string)
+	path.UploadFolder = pathMap["uploadFolder"].(string)
+	path.ViewsFolder = pathMap["viewsFolder"].(string)
+	path.NameListFolder = pathMap["namelistFolder"].(string)
+	Path = path
+
+	mailMap := pool["Mail"].(map[string]interface{})
+	mail := TypeMail{}
+	mail.MailAccount = mailMap["mailAccount"].(string)
+	mail.Password = mailMap["mailPassword"].(string)
+	mail.SMTPServer = mailMap["smtpServer"].(string)
+	mail.SMTPPort = mailMap["smtpPort"].(string)
+	Mail = mail
+
+	dbMap := pool["Database"].(map[string]interface{})
+	db := TypeDatabase{}
+	db.Path = dbMap["dbPath"].(string)
+	Database = db
+
+	regexMap := pool["Regex"].(map[string]interface{})
+	reg := TypeRegex{}
+	reg.PatternQQ = regexMap["patternQQ"].(string)
+	reg.PatternStuID = regexMap["patternStudentID"].(string)
+	Regex = reg
+
+	logMap := pool["Log"].(map[string]interface{})
+	log := TypeLog{}
+	log.Filepath = logMap["logPath"].(string)
+	Log = log
+
+	webconstances := pool["WebConstance"].(map[string]interface{})
+	for k, v := range webconstances {
+		WebConstance[k] = v.(string)
+	}
+}
+
+// ExportDefault when need
+func ExportDefault() {
+	filename := "./config.json"
+
+	pool := make(map[string]interface{})
+
+	pool["App"] = App
+	pool["Path"] = Path
+	pool["Mail"] = Mail
+	pool["Database"] = Database
+	pool["Regex"] = Regex
+	pool["Log"] = Log
+	pool["WebConstance"] = WebConstance
+
+	bytes, err := json.MarshalIndent(pool, "", "    ")
+	if err != nil {
+		panic("config export error !?")
+	}
+
+	err = ioutil.WriteFile(filename, bytes, 0666)
+	if err != nil {
+		panic("config export error: " + err.Error())
+	}
 }

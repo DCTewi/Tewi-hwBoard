@@ -1,8 +1,14 @@
-// database instance
-*.db
+#vscode
+.vscode/
 
-// log folder
+# custom data
+*.db
+*.json
+*.crt
+*.key
+
+# log folder
 logs/
 
-// test upload
-static/upload/
+# upload folder
+upload/

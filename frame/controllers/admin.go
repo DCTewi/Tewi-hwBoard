@@ -48,7 +48,7 @@ func (c *AdminController) Get(w http.ResponseWriter, r *http.Request) {
 			} else if taskinfo.End.After(time.Now()) { // query available
 				msg = config.WebConstance["TaskNotEnd"]
 			} else { // query ok
-				querypath := "./static/upload/" + taskinfo.Subject + "-" + taskinfo.End.Format("060102")
+				querypath := config.Path.UploadFolder + "/" + taskinfo.Subject + "-" + taskinfo.End.Format("060102")
 				// zip folder
 				err := util.ZipDir(querypath)
 				if err != nil {
@@ -144,8 +144,13 @@ func (c *AdminController) Post(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				ndatestr := newsubmitdate.Format("2006-01-02")
-				nsta, _ := time.Parse("2006-01-02 15:04", ndatestr+" 00:00")
-				nend, _ := time.Parse("2006-01-02 15:04", ndatestr+" 23:59")
+				loc, err := time.LoadLocation(config.App.UserTimeZone)
+				if err != nil {
+					log.Error("Parse TIMEZONE error: " + err.Error())
+				}
+
+				nsta, _ := time.ParseInLocation("2006-01-02 15:04", ndatestr+" 00:00", loc)
+				nend, _ := time.ParseInLocation("2006-01-02 15:04", ndatestr+" 23:59", loc)
 
 				newtaskinfo := database.TaskInfo{
 					Subject:  nsub,

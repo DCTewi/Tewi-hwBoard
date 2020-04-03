@@ -42,6 +42,7 @@ func (p *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Info("Get GET request on IP:" + r.RemoteAddr + " of path:" + r.URL.Path)
 			controller.Get(w, r)
 		} else {
+			r.ParseForm()
 			log.Info("Get POST request on IP:" + r.RemoteAddr + " of path:" + r.URL.Path + " with form:" + fmt.Sprint(r.Form))
 			controller.Post(w, r)
 		}

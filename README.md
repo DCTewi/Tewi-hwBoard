@@ -44,83 +44,35 @@ sqlite3 -version
 go get github.com/dctewi/tewi-hwboard
 ```
 
-3. Fill app settings
+3. Create directory
 
-Edit the  `App`，`Mail` and `Database` settings in `${GOPATH}/src/github.com/dctewi/tewi-hwboard/config/config.go`. Setting others if you need.
-
-```go
-// App configs
-var App = struct {
-	Domain       string
-	HTTPPort     string
-	SSLPort      string
-	UseTLS       bool
-	TLSCrtPath   string
-	TLSKeyPath   string
-	Title        string
-	UserTimeZone string
-	AdminEmails  []string
-}{
-	Domain:       "localhost",
-	HTTPPort:     ":80",
-	SSLPort:      ":443",
-	UseTLS:       true,
-	TLSCrtPath:   "./domain.crt",
-	TLSKeyPath:   "./domain.key",
-	Title:        "作业布告栏",
-	UserTimeZone: "Asia/Shanghai",
-	AdminEmails: []string{
-		"you@domain.com",
-	},
-}
-
-// Mail configs
-var Mail = struct {
-	MailAccount string
-	Password    string
-	SMTPServer  string
-	SMTPPort    string
-}{
-	MailAccount: "you@domain.com",
-	Password:    "password",
-	SMTPServer:  "smtp.somedomain.com",
-	SMTPPort:    "465",
-}
-
-// Database configs
-var Database = struct {
-	Path string
-}{
-	Path: "./database.db",
-}
-```
-
-4. Create directory
-
-Copy `./config/database.sql`，`./static/*`，`./views/*` into somewhere you want to run this app, such as `~/hwboard`, and create a sqlite3 database here:
+Copy `./app/` into somewhere you want to run this app, such as `~/hwboard`, and create a sqlite3 database here:
 
 ```shell
-mkdir ~/hwboard ~/hwboard/static ~/hwboard/views
+mkdir ~/hwboard ~/hwboard/app
 
 cd ${GOPATH}/src/github.com/dctewi/tewi-hwboard/
-cp ./config/database.sql ~/hwboard/database.sql
-cp ./static/* ~/hwboard/static/
-cp ./views/* ~/hwboard/views/
+cp ./app/* ~/hwboard/app/
 
 cd ~/hwboard
 sqlite3 database.db
-sqlite> .read database.sql
+sqlite> .read app/database.sql
 sqlite> .quit
 ```
 
-5. Complie 
+5. Complie and run for first time and generate config.json
 
 ```shell
 cd ~/hwboard
 go build github.com/dctewi/tewi-hwboard
+./tewi-hwboard
 ```
 
-6. Launch app by daemon
+6. Setting up
+
+Edit the generated `~/hwboard/config.json/` file to customize your app instace. The Json file will be reload when app launched.
+
+7. Launch app by daemon
 
 Create and edit `/lib/systemd/system/hwboard.service`：
 

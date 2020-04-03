@@ -2,7 +2,9 @@ package util
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -128,4 +130,37 @@ func ZipDir(dir string) error {
 		return nil
 	})
 	return err
+}
+
+// GetNameListMap returns known namelist
+func GetNameListMap() (nameMap map[string]string) {
+	namepath := config.Path.NameListFolder
+	nameMap = make(map[string]string)
+
+	dir, err := ioutil.ReadDir(namepath)
+	if err != nil {
+		return
+	}
+
+	for _, fp := range dir {
+		if !fp.IsDir() {
+			if strings.HasSuffix(fp.Name(), ".json") {
+				bytes, err := ioutil.ReadFile(namepath + "/" + fp.Name())
+				if err != nil {
+					return
+				}
+
+				res := make(map[string]interface{})
+				err = json.Unmarshal(bytes, &res)
+				if err != nil {
+					return
+				}
+
+				for k, v := range res {
+					nameMap[k] = v.(string)
+				}
+			}
+		}
+	}
+	return
 }

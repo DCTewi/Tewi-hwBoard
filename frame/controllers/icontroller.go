@@ -27,7 +27,10 @@ func ToView(w http.ResponseWriter, name string, model interface{}) {
 		"availdcolor": DealAvailableColor,
 		"s2bool":      DealAvailablePipeline,
 	})
-	t, err := t.ParseFiles("./views/"+name+".tpl", "./views/header.tpl", "./views/footer.tpl")
+	t, err := t.ParseFiles(
+		config.Path.ViewsFolder+"/"+name+".tpl",
+		config.Path.ViewsFolder+"/header.tpl",
+		config.Path.ViewsFolder+"/footer.tpl")
 	if err != nil {
 		log.Error("Convert view error: " + err.Error())
 	}
@@ -48,7 +51,8 @@ func DealWebConstance(args ...interface{}) string {
 // DealTimeFormat {{.Time | time}}
 func DealTimeFormat(args ...interface{}) string {
 	if len(args) >= 1 {
-		return args[0].(time.Time).Format("2006-01-02 15:04:05")
+		res := args[0].(time.Time).Format("2006-01-02 15:04 UTC-0700")
+		return res[:len(res)-2]
 	}
 	return ""
 }
