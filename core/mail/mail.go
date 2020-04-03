@@ -158,7 +158,7 @@ func sendDirectlyUsingTLS(mail Mail) error {
 	account := &config.Mail
 	auth := smtp.PlainAuth("", account.MailAccount, account.Password, account.SMTPServer)
 	header := map[string]string{
-		"From":         mail.Nickname + "<noreply@dctewi.com>",
+		"From":         mail.Nickname + "<" + account.MailAccount + ">",
 		"To":           strings.Join(mail.Sendto, ","),
 		"Subject":      mail.Subject,
 		"Content-Type": "text/html; charset=UTF-8",

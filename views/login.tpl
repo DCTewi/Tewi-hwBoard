@@ -13,7 +13,7 @@
 {{end}}
 </div>
 <script src="/js/util.js"></script>
-<script>function checkForm(){return(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^20182410[0-9]{4}$/g)&&checkbyid('loginform','cikey',/^[0-9a-zA-Z_=]{6}$/g));}</script>
+<script>function checkForm(){return(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^2018[0-9]{8}$/g)&&checkbyid('loginform','cikey',/^[0-9a-zA-Z_=]{6}$/g));}</script>
 <form action="/login" method="POST" id="LoginForm" name="loginform" onsubmit="return checkForm()">
     <div class="input-group mt-3 mb-3">
         <div class="input-group-prepend">
@@ -46,7 +46,7 @@
         <span class="text-warning">({{"LoginWarning" | tr}})</span>
     </div>
 </form>
-<script>$(function(){$("#QueryCKey").click(function(){if(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^20182410[0-9]{4}$/g)){var qq=document.forms["loginform"]["userq"].value;var id=document.forms["loginform"]["stuid"].value;$.ajax({type:'POST',url:'/login?q=ckey',data:{"userq":qq,"stuid":id},success:function(data){console.log(data);if(data!=""){$("#PageHead").append('<div class="alert alert-danger alert-dismissible fade show mt-3"role="alert"><strong>错误:</strong>'+data+'<button type="button"class="close"data-dismiss="alert"aria-label="Close"><span aria-hidden="true">×</span></button></div>')}}});$("#QueryCKey").attr("disabled",true);$("#QueryCKey").addClass("disabled")}})})</script>
+<script>$(function(){$("#QueryCKey").click(function(){if(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^2018[0-9]{8}$/g)){var qq=document.forms["loginform"]["userq"].value;var id=document.forms["loginform"]["stuid"].value;$.ajax({type:'POST',url:'/login?q=ckey',data:{"userq":qq,"stuid":id},success:function(data){console.log(data);if(data!=""){$("#PageHead").append('<div class="alert alert-danger alert-dismissible fade show mt-3"role="alert"><strong>错误:</strong>'+data+'<button type="button"class="close"data-dismiss="alert"aria-label="Close"><span aria-hidden="true">×</span></button></div>')}}});$("#QueryCKey").attr("disabled",true);$("#QueryCKey").addClass("disabled")}})})</script>
 
 {{- template "footer" . -}}
 {{- end -}}
