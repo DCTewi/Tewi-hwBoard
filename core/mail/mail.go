@@ -1,7 +1,10 @@
 package mail
 
 import (
+	"crypto/tls"
 	"errors"
+	"fmt"
+	"net"
 	"net/smtp"
 	"strings"
 	"time"
@@ -24,11 +27,7 @@ func NewMail(sendto []string, confirmkey string) (mail Mail) {
 	mail.Sendto = sendto
 	mail.Nickname = config.App.Title
 	mail.Subject = "[验证码] 来自 " + config.App.Title + " 的验证码"
-	mail.Content = `<html>
-<head>
-<title>你的验证码是: ` + confirmkey + `</title>
-</head>
-<body>
+	mail.Content = `<body>
 <div style="background-color:#ECECEC; padding: 35px;">
 <table cellpadding="0" align="center"
 	   style="width: 600px; margin: 0px auto; text-align: left; position: relative; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 14px; font-family:微软雅黑, 黑体; line-height: 1.5; box-shadow: rgb(153, 153, 153) 0px 0px 5px; border-collapse: collapse; background-position: initial initial; background-repeat: initial initial;background:#fff;">
@@ -60,7 +59,6 @@ func NewMail(sendto []string, confirmkey string) (mail Mail) {
 </table>
 </div>
 </body>
-</html>
 `
 	return mail
 }
@@ -70,11 +68,7 @@ func NewAdminMail(sendto []string, adminkey string) (mail Mail) {
 	mail.Sendto = sendto
 	mail.Nickname = config.App.Title
 	mail.Subject = "[管理员登录]本次的登录链接"
-	mail.Content = `<html>
-<head>
-<title>管理员登录</title>
-</head>
-<body>
+	mail.Content = `<body>
 <div style="background-color:#ECECEC; padding: 35px;">
 <table cellpadding="0" align="center"
 	   style="width: 600px; margin: 0px auto; text-align: left; position: relative; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 14px; font-family:微软雅黑, 黑体; line-height: 1.5; box-shadow: rgb(153, 153, 153) 0px 0px 5px; border-collapse: collapse; background-position: initial initial; background-repeat: initial initial;background:#fff;">
@@ -106,7 +100,6 @@ func NewAdminMail(sendto []string, adminkey string) (mail Mail) {
 </table>
 </div>
 </body>
-</html>
 `
 	return mail
 }
@@ -118,7 +111,7 @@ func Send(mail Mail) error {
 	if last, ok := lastsent[mail.Sendto[0]]; ok {
 		t, _ := time.ParseDuration("10m")
 		if now.After(last.Add(t)) {
-			err := sendDirectly(mail)
+			err := trySendMail(mail)
 			if err == nil {
 				lastsent[mail.Sendto[0]] = now
 			}
@@ -127,21 +120,96 @@ func Send(mail Mail) error {
 		return errors.New("too many emails")
 	}
 
-	err := sendDirectly(mail)
+	err := trySendMail(mail)
 	if err == nil {
 		lastsent[mail.Sendto[0]] = now
 	}
 	return err
 }
 
+func trySendMail(mail Mail) error {
+	if config.Mail.SMTPPort != "25" {
+		return sendDirectlyUsingTLS(mail)
+	}
+	return sendDirectly(mail)
+}
+
 func sendDirectly(mail Mail) error {
 	account := &config.Mail
 	auth := smtp.PlainAuth("", account.MailAccount, account.Password, account.SMTPServer)
-	contentType := "Content-Type: text/html; charset=UTF-8"
 
-	msg := []byte("To: " + strings.Join(mail.Sendto, ",") + "\r\nFrom: " + mail.Nickname +
-		"<" + account.MailAccount + ">\r\nSubject: " + mail.Subject + "\r\n" + contentType + "\r\n\r\n" + mail.Content)
+	header := map[string]string{
+		"From":         mail.Nickname + "<noreply@dctewi.com>",
+		"To":           strings.Join(mail.Sendto, ","),
+		"Subject":      mail.Subject,
+		"Content-Type": "text/html; charset=UTF-8",
+	}
+	var msg string
+	for k, v := range header {
+		msg += fmt.Sprintf("%s:%s\r\n", k, v)
+	}
+	msg += "\r\n" + mail.Content
 
-	return smtp.SendMail(account.SMTPServer+":"+account.SMTPPort, auth, account.MailAccount, mail.Sendto, msg)
+	return smtp.SendMail(account.SMTPServer+":"+account.SMTPPort, auth, account.MailAccount, mail.Sendto, []byte(msg))
 
+}
+
+func sendDirectlyUsingTLS(mail Mail) error {
+	account := &config.Mail
+	auth := smtp.PlainAuth("", account.MailAccount, account.Password, account.SMTPServer)
+	header := map[string]string{
+		"From":         mail.Nickname + "<noreply@dctewi.com>",
+		"To":           strings.Join(mail.Sendto, ","),
+		"Subject":      mail.Subject,
+		"Content-Type": "text/html; charset=UTF-8",
+	}
+	var msg string
+	for k, v := range header {
+		msg += fmt.Sprintf("%s:%s\r\n", k, v)
+	}
+	msg += "\r\n" + mail.Content
+
+	c, err := tlsDial(fmt.Sprintf("%s:%s", account.SMTPServer, account.SMTPPort))
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	if auth != nil {
+		if ok, _ := c.Extension("AUTH"); ok {
+			if err = c.Auth(auth); err != nil {
+				return err
+			}
+		}
+	}
+	if err = c.Mail(account.MailAccount); err != nil {
+		return err
+	}
+	for _, addr := range mail.Sendto {
+		if err = c.Rcpt(addr); err != nil {
+			return err
+		}
+	}
+	w, err := c.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write([]byte(msg))
+	if err != nil {
+		return err
+	}
+	err = w.Close()
+	if err != nil {
+		return err
+	}
+	return c.Quit()
+}
+
+func tlsDial(addr string) (*smtp.Client, error) {
+	conn, err := tls.Dial("tcp", addr, nil)
+	if err != nil {
+		return nil, err
+	}
+	host, _, _ := net.SplitHostPort(addr)
+	return smtp.NewClient(conn, host)
 }
