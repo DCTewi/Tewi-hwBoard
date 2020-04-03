@@ -30,6 +30,13 @@ var Mail = struct {
 	SMTPPort:    "25",
 }
 
+// Database configs
+var Database = struct {
+	Path string
+}{
+	Path: "./database.db",
+}
+
 // Regex configs
 var Regex = struct {
 	PatternQQ    string
@@ -37,13 +44,6 @@ var Regex = struct {
 }{
 	PatternQQ:    "^[0-9]{5,15}$",
 	PatternStuID: "^20182410[0-9]{4}$",
-}
-
-// Database configs
-var Database = struct {
-	Path string
-}{
-	Path: "./config/database.db",
 }
 
 // Log configs

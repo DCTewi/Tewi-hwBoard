@@ -27,7 +27,7 @@ func ToView(w http.ResponseWriter, name string, model interface{}) {
 		"availdcolor": DealAvailableColor,
 		"s2bool":      DealAvailablePipeline,
 	})
-	t, err := t.ParseFiles("frame/views/"+name+".tpl", "frame/views/header.tpl", "frame/views/footer.tpl")
+	t, err := t.ParseFiles("./views/"+name+".tpl", "./views/header.tpl", "./views/footer.tpl")
 	if err != nil {
 		log.Error("Convert view error: " + err.Error())
 	}
