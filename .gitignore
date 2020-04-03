@@ -1,0 +1,8 @@
+// database instance
+*.db
+
+// log folder
+logs/
+
+// test upload
+static/upload/

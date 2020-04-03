@@ -1,0 +1,33 @@
+html,
+body {
+  font-family: "STZhongsong", 华文中宋, 'Times New Roman', Times, SimSun, serif;
+  height: 100%;
+}
+
+.wrapper {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 50px;
+}
+
+#HeaderContainer {
+  padding-top: 1%;
+  padding-bottom: 1%;
+  margin-bottom: 0px;
+}
+
+#TitleText {
+  font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+}
+
+#Footer {
+  position: absolute;
+  bottom: 0px;
+  height: 50px;
+  width: 100%;
+}
+
+#FooterBlock {
+  margin-bottom: 0px;
+  padding: 10px;
+}
