@@ -47,7 +47,7 @@ var Path = TypePath{
 	StaticFoler:    "./app/static",
 	UploadFolder:   "./upload",
 	ViewsFolder:    "./app/views",
-	NameListFolder: "/app/names",
+	NameListFolder: "./app/names",
 }
 
 // TypeMail struct

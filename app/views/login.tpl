@@ -13,7 +13,7 @@
 {{end}}
 </div>
 <script src="/js/util.js"></script>
-<script>function checkForm(){return(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^2018[0-9]{8}$/g)&&checkbyid('loginform','cikey',/^[0-9a-zA-Z_=]{6}$/g));}</script>
+<script>function checkForm(){return(checkbyid('loginform','userq',/^[0-9]{5,15}$/g)&&checkbyid('loginform','stuid',/^2018[0-9]{8}$/g)&&checkbyid('loginform','cikey',/^[0-9a-zA-Z_-]{6}$/g));}</script>
 <form action="/login" method="POST" id="LoginForm" name="loginform" onsubmit="return checkForm()">
     <div class="input-group mt-3 mb-3">
         <div class="input-group-prepend">
