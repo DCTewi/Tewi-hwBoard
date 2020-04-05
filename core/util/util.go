@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/dctewi/tewi-hwboard/config"
+	"github.com/dctewi/tewi-hwboard/core/database"
 )
 
 const (
@@ -133,9 +135,10 @@ func ZipDir(dir string) error {
 }
 
 // GetNameListMap returns known namelist
-func GetNameListMap() (nameMap map[string]string) {
+func GetNameListMap() (nameMap map[string]string, classMap map[string]int) {
 	namepath := config.Path.NameListFolder
 	nameMap = make(map[string]string)
+	classMap = make(map[string]int)
 
 	dir, err := ioutil.ReadDir(namepath)
 	if err != nil {
@@ -150,17 +153,39 @@ func GetNameListMap() (nameMap map[string]string) {
 					return
 				}
 
-				res := make(map[string]interface{})
-				err = json.Unmarshal(bytes, &res)
+				tot := make(map[string]interface{})
+				err = json.Unmarshal(bytes, &tot)
 				if err != nil {
 					return
 				}
 
+				classno := int(tot["classno"].(float64))
+
+				res := tot["namelist"].(map[string]interface{})
+
 				for k, v := range res {
 					nameMap[k] = v.(string)
+					classMap[k] = classno
 				}
 			}
 		}
 	}
 	return
+}
+
+// GetUploadFolerName returns path of task
+func GetUploadFolerName(t *database.TaskInfo) string {
+	res := config.Path.UploadFolder + "/ID." + strconv.Itoa(t.ID) + "-Class." + strconv.Itoa(t.ClassNO) + "-" + t.Subject
+	return res
+}
+
+// GetUploadFileName returns filename only
+func GetUploadFileName(t *database.TaskInfo, u database.UserInfo, name string, isknown bool) string {
+	res := u.StudentID + "-" + name + "-" + t.Subject + "-" + strconv.Itoa(t.ID) + "." + t.FileType
+
+	if !isknown {
+		res = "[UNKNOWN]" + res
+	}
+
+	return res
 }

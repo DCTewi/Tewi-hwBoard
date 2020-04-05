@@ -17,7 +17,9 @@
 <script src="/js/util.js"></script>
 <script>
     function checkTask() {
-        return (checkbyid('taskform', 'sub', /^\S{2,}$/g) && checkbyid('taskform', 'ttl', /^\S{2,}$/g) &&
+        return (checkbyid('taskform', 'sub', /^\S{2,}$/g) && 
+            checkbyid('taskform', 'cls', /^[0-9]{1,2}$/g) &&
+            checkbyid('taskform', 'ttl', /^\S{2,}$/g) &&
             checkbyid('taskform', 'fmt', /^[a-zA-Z0-9]{1,}$/g) &&
             checkbyid('taskform', 'dat', /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/g));
     }
@@ -28,6 +30,12 @@
             <span class="input-group-text">{{"Subject" | tr}}:</span>
         </div>
         <input type="text" id="sub" name="sub" class="form-control" placeholder="{{"SubjectPlaceHolder" | tr}}">
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">{{"ClassNo" | tr}}:</span>
+        </div>
+        <input type="text" id="cls" name="cls" class="form-control" placeholder="{{"ClassNoPlaceHolder" | tr}}">
     </div>
     <div class="input-group mb-3">
         <div class="input-group-prepend">

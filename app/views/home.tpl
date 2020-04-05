@@ -19,6 +19,7 @@
     <!-- card body -->
     <div class="card-body">
         <!-- text here -->
+        <b class="text-primary mr-2">{{.ClassNO | clsname}}</b>
         <b class="text-body mr-2">{{.Subject}}</b>
         <span class="text-body mr-2">{{.SubTitle}}</span>
         <code class="float-right">({{.FileType}})</code>

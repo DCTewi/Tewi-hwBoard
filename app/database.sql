@@ -4,7 +4,8 @@ CREATE TABLE `taskinfo` (
     `subtitle` TEXT NOT NULL,
     `filetype` VARCHAR(64) NOT NULL,
     `start` DATE NOT NULL,
-    `end` DATE NOT NULL
+    `end` DATE NOT NULL,
+    `classno` INTEGER DEFAULT 0
 );
 
 CREATE TABLE `userinfo` (

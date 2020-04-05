@@ -12,7 +12,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/dctewi/tewi-hwboard/config"
 	"github.com/dctewi/tewi-hwboard/core/database"
 	"github.com/dctewi/tewi-hwboard/core/session"
 	"github.com/dctewi/tewi-hwboard/core/util"
@@ -67,19 +66,25 @@ func (c *SubmitController) Post(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				savepath := config.Path.UploadFolder + "/" + taskinfo.Subject + "-" + taskinfo.End.Format("060102") + "/"
+				savepath := util.GetUploadFolerName(taskinfo)
 				err = util.MakeDirIfNessesary(savepath)
 				if err != nil {
 					log.Error("File submit with MakeDir err: " + err.Error())
 					return
 				}
 
-				username, ok := util.GetNameListMap()[userinfo.StudentID]
+				nameMap, classMap := util.GetNameListMap()
+				username, ok := nameMap[userinfo.StudentID]
 				if !ok {
 					username = "[Mystery]"
 				}
 
-				filename := savepath + userinfo.StudentID + "-" + username + "-" + taskinfo.Subject + "-" + taskinfo.End.Format("060102") + "." + taskinfo.FileType
+				clsno, ok := classMap[userinfo.StudentID]
+				if !ok || clsno != taskinfo.ClassNO {
+					ok = false
+				}
+
+				filename := savepath + "/" + util.GetUploadFileName(taskinfo, userinfo, username, ok)
 
 				f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
 				if err != nil {

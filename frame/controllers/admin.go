@@ -48,7 +48,7 @@ func (c *AdminController) Get(w http.ResponseWriter, r *http.Request) {
 			} else if taskinfo.End.After(time.Now()) { // query available
 				msg = config.WebConstance["TaskNotEnd"]
 			} else { // query ok
-				querypath := config.Path.UploadFolder + "/" + taskinfo.Subject + "-" + taskinfo.End.Format("060102")
+				querypath := util.GetUploadFolerName(taskinfo)
 				// zip folder
 				err := util.ZipDir(querypath)
 				if err != nil {
@@ -129,10 +129,16 @@ func (c *AdminController) Post(w http.ResponseWriter, r *http.Request) {
 		if _, ok := tokens.(map[string]bool)[token]; ok { // token available
 			if sess.Get("admin") == true { // logged admin want to add task
 				nsub := template.HTMLEscapeString(r.Form.Get("sub"))
+				ncls := template.HTMLEscapeString(r.Form.Get("cls"))
 				nttl := template.HTMLEscapeString(r.Form.Get("ttl"))
 				nfmt := template.HTMLEscapeString(r.Form.Get("fmt"))
 				ndat := template.HTMLEscapeString(r.Form.Get("dat"))
 
+				clsno, err := strconv.Atoi(ncls)
+				if err != nil {
+					log.Warn("Parse class no. error with form: " + fmt.Sprint(r.Form))
+					return
+				}
 				usertimezone, err := time.LoadLocation(config.App.UserTimeZone)
 				if err != nil {
 					log.Fatal("APP CONFIG ERROR with config.App.UserTimeZone, error: " + err.Error())
@@ -158,6 +164,7 @@ func (c *AdminController) Post(w http.ResponseWriter, r *http.Request) {
 					FileType: nfmt,
 					Start:    nsta,
 					End:      nend,
+					ClassNO:  clsno,
 				}
 				database.Insert(newtaskinfo)
 				log.Info("New task inserted on IP:" + r.RemoteAddr)

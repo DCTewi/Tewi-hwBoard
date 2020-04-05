@@ -1,0 +1,1 @@
+ALTER TABLE taskinfo ADD COLUMN classno INTEGER DEFAULT 0;

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -26,6 +27,7 @@ func ToView(w http.ResponseWriter, name string, model interface{}) {
 		"checktime":   DealTimeAvailable,
 		"availdcolor": DealAvailableColor,
 		"s2bool":      DealAvailablePipeline,
+		"clsname":     DealClassName,
 	})
 	t, err := t.ParseFiles(
 		config.Path.ViewsFolder+"/"+name+".tpl",
@@ -89,6 +91,27 @@ func DealAvailablePipeline(args ...interface{}) string {
 	if len(args) >= 1 {
 		if args[0] == DealWebConstance("Available") {
 			return "True"
+		}
+	}
+	return ""
+}
+
+// DealClassName {{.ClassNO | clsname}}
+func DealClassName(args ...interface{}) string {
+	if len(args) >= 1 {
+		switch args[0].(type) {
+		case int:
+			if args[0] == 0 {
+				return config.WebConstance["NullClass"]
+			} else {
+				return strconv.Itoa(args[0].(int)) + config.WebConstance["Class"]
+			}
+		case string:
+			if args[0] == "0" {
+				return config.WebConstance["NullClass"]
+			} else {
+				return args[0].(string) + config.WebConstance["Class"]
+			}
 		}
 	}
 	return ""

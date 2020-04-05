@@ -33,6 +33,7 @@ type TaskInfo struct {
 	FileType string
 	Start    time.Time
 	End      time.Time
+	ClassNO  int
 }
 
 // UserInfo table item
@@ -83,10 +84,10 @@ func Insert(item interface{}) {
 
 	switch item.(type) {
 	case TaskInfo:
-		state, err := db.Prepare("INSERT INTO taskinfo(subject, subtitle, filetype, start, end) VALUES(?, ?, ?, ?, ?)")
+		state, err := db.Prepare("INSERT INTO taskinfo(subject, subtitle, filetype, start, end, classno) VALUES(?, ?, ?, ?, ?, ?)")
 
 		v := item.(TaskInfo)
-		_, err = state.Exec(v.Subject, v.SubTitle, v.FileType, v.Start, v.End)
+		_, err = state.Exec(v.Subject, v.SubTitle, v.FileType, v.Start, v.End, v.ClassNO)
 		checkerr(err)
 	case UserInfo:
 		state, err := db.Prepare("INSERT INTO userinfo(email, studentid) VALUES(?, ?)")
@@ -118,7 +119,7 @@ func Delete(item interface{}) {
 		checkerr(err)
 		info := TaskInfo{}
 		for rows.Next() {
-			err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End)
+			err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End, &info.ClassNO)
 			checkerr(err)
 			break
 		}
@@ -177,10 +178,10 @@ func Update(id int, item interface{}) {
 
 	switch item.(type) {
 	case TaskInfo:
-		state, err := db.Prepare("UPDATE taskinfo SET subject=?, subtitle=?, filetype=?, start=?, end=? WHERE id=?")
+		state, err := db.Prepare("UPDATE taskinfo SET subject=?, subtitle=?, filetype=?, start=?, end=?, classno=? WHERE id=?")
 
 		v := item.(TaskInfo)
-		_, err = state.Exec(v.Subject, v.SubTitle, v.FileType, v.Start, v.End, id)
+		_, err = state.Exec(v.Subject, v.SubTitle, v.FileType, v.Start, v.End, v.ClassNO, id)
 		checkerr(err)
 	case UserInfo:
 		state, err := db.Prepare("UPDATE userinfo SET email=?, studentid=? WHERE id=?")
@@ -213,7 +214,7 @@ func GetAll(table string) *list.List {
 
 		for rows.Next() {
 			info := TaskInfo{}
-			err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End)
+			err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End, &info.ClassNO)
 			checkerr(err)
 			res.PushBack(info)
 		}
@@ -260,7 +261,7 @@ func GetTaskBySubject(subject string) *list.List {
 
 	for rows.Next() {
 		info := TaskInfo{}
-		err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End)
+		err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End, &info.ClassNO)
 		checkerr(err)
 		res.PushBack(info)
 	}
@@ -281,7 +282,7 @@ func GetTaskByID(id int) *TaskInfo {
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End)
+		err := rows.Scan(&info.ID, &info.Subject, &info.SubTitle, &info.FileType, &info.Start, &info.End, &info.ClassNO)
 		checkerr(err)
 		break
 	}

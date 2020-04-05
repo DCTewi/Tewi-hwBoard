@@ -142,6 +142,10 @@ var WebConstance = map[string]string{
 	"QueryFileSuccess":      "请求成功, 正在下载...",
 	"QueryFileUnknownError": "请求失败",
 	"NoAvailableFile":       "没有可用文件",
+	"Class":                 "班",
+	"ClassNo":               "所属班级",
+	"ClassNoPlaceHolder":    "如：4",
+	"NullClass":             "无班级约束",
 }
 
 func init() {

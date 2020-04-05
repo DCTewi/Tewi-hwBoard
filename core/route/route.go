@@ -20,7 +20,7 @@ type Mux struct {
 func (p *Mux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("Handler crashed: " + err.(string))
+			log.Error("Handler crashed: " + fmt.Sprint(err))
 			panic(err)
 		}
 	}()
