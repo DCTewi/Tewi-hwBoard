@@ -1,1 +1,9 @@
 this is namelist folder
+
+json format:
+{
+    "classno": 1,
+	"namelist": {
+        "2018xxxx": "NAME"
+    }
+}
