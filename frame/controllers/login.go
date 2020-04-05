@@ -119,6 +119,7 @@ func (c *LoginController) Post(w http.ResponseWriter, r *http.Request) {
 							info.Email = userq
 							info.StudentID = stuid
 							database.Insert(info)
+							infoByStuID, infoByEmail = info, info
 							log.Info("Login with register success: userq:" + userq + " stuid:" + stuid)
 						}
 						// Correct login
